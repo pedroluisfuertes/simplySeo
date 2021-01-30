@@ -1,0 +1,59 @@
+<div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+    <!-- Position it -->
+    <div style="margin: 3rem;position: fixed;/* top: 0; */right: 0;bottom: 0;min-width: 15rem; z-index: 1100;" id="notifications">
+      <!-- Then put toasts within -->
+    </div>
+</div>
+
+<script>
+function addNotification(title, content, status) {
+        randomId = Math.round(Math.random() * 100000);
+        notificationClass ="";
+        switch (status) {
+          case "error":
+            notificationClass = "notificationError";
+            break;
+            case "success":
+            notificationClass = "notificationSuccess";
+            break;
+          default:
+            break;
+        }
+        let html = `<div class="toast ${notificationClass}" id="${randomId}" role="alert" aria-live="assertive" aria-atomic="true" data-delay="10000">
+        <div class="toast-header">
+          <!--<img src="..." class="rounded mr-2" alt="...">-->
+          <strong class="mr-auto">${title}</strong>
+          <!--<small class="text-muted">just now</small>-->
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          ${content}
+        </div>
+      </div>`;
+
+      document.getElementById("notifications").insertAdjacentHTML("beforeend", html);
+      $(`#${randomId}`).toast('show');
+    }
+
+</script>
+
+<style>
+  .notificationWarning{
+    background: darkorange;;
+  }
+  .notificationError {
+    background-color: #dc3545!important;
+  }
+  .notificationSuccess {
+    background-color: #28a745!important;
+  }
+  .notificationError .toast-header, .notificationSuccess .toast-header{
+    background-color: unset;
+    color: #fff!important;
+  }
+  .notificationError .toast-body, .notificationSuccess .toast-body{
+    background-color: rgba(255,255,255,.50);
+  }
+</style>

@@ -1,0 +1,81 @@
+<button type="button" class="open-btn  btn btn-info" id="open-btn" >Mostrar galería</button>
+<div id="cms-container"></div>
+<script src="https://media-library.cloudinary.com/global/all.js"></script>
+<script>
+const cloudinaryOptions = {
+        cloud_name: '{{cloudinary["cloudName"]}}',
+        api_key: '{{cloudinary["apiKey"]}}',
+        username: '{{cloudinary["username"]}}',
+        timestamp: '{{cloudinary["timestamp"]}}',
+        signature: '{{cloudinary["signature"]}}',
+        button_class: ' btn btn-info',
+        button_caption: 'Mostrar galería',
+        remove_header:true, 
+        inline_container: '#cms-container',
+        folder: {path: '{{cloudinary["folder"]}}'},
+        /*default_transformations: [
+          [{quality: "auto"},{fetch_format: "auto"}],
+          //[{w_80,h_80,c_fill,g_auto,r_max},{f_auto,q_auto}]
+        ],*/
+        }
+
+let showGallery = false; 
+document.getElementById("open-btn").addEventListener("click", () => {
+  showGallery = !showGallery;
+  if(showGallery){
+    document.getElementById("cms-container").style.display = "block";
+    window.ml.show(cloudinaryOptions);
+  }else{
+    document.getElementById("cms-container").style.display = "none";
+    window.ml.hide();
+
+  }
+})
+window.ml = cloudinary.createMediaLibrary(cloudinaryOptions, {
+     insertHandler: function (data) {
+       data.assets.forEach(asset => { console.log("Inserted asset:",
+       JSON.stringify(asset, null, 2)) })
+       }
+    });
+
+function generatePicture(imgUrl){
+    let urlParts = imgUrl.toLowerCase().split("/");
+    //console.log(urlParts);
+    if(urlParts[0].includes("http") || urlParts[0].includes("https")){
+        urlParts.splice(0,2);
+    }
+    if(urlParts[0] != "res.cloudinary.com"){
+        throw "We can't identify this domain"; 
+    }
+    let urlAux = urlParts.slice(0,4).join("/");
+    let extension = urlParts[urlParts.length - 1].split(".");
+    let imageName = extension.splice(0, extension.length - 1).join(".");
+
+    let sizes = [100, 200, 300, 576, 768, 992, 1200]; 
+    let formats = ["jpg", "webp"]; 
+
+    let html = `<figure style="text-align: center;"><picture>`;
+        formats.forEach(format => {
+            html += `<source type="image/${format}" srcset="${sizes.map(size =>{
+                return `https://${urlAux}/c_scale,w_${size}/${_myDomain}/${imageName}.${format} ${size}w`;
+            }).join(",")}">`;
+        });
+
+    html += `<img width="450em" src=https://${urlAux}/${_myDomain}/${imageName}.${extension}>
+    </picture>
+    <figcaption>Escribe una leyenda.</figcaption>
+    </figure>`;
+    extension = extension[0];
+    console.log(urlAux, imageName, extension);
+
+    return html;
+}
+</script>
+<style>
+  #cms-container {
+    display: none;
+    overflow-y: auto;
+    resize: vertical;
+    height: 25em;
+  }
+</style>

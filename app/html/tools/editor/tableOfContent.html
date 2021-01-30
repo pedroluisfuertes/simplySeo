@@ -1,0 +1,165 @@
+<script>
+function generateMenuNavigation() {
+    let toc_container = descriptionEditor.querySelector("#toc_container");
+
+    
+    if(toc_container){
+        toc_container.parentNode.removeChild(toc_container);
+    }
+
+    let headings = descriptionEditor.querySelectorAll("h2, h3, h4, h5, h6");
+    if(headings.length > 0){
+        let levels = [0, 0, 0, 0, 0];
+        let level = 0; 
+        let ul = `<ul >`;
+        let html = `<nav id="toc_container" class="no_bullets"><p class="toc_title">Índice de la review <span class="toc_toggle">[<a href="#">Mostrar</a>]</span></p><ul class="toc_list">`;
+
+        for (let heading of headings) {
+            let newLevel;
+            switch (heading.tagName) {
+                case "H2":
+                    newLevel = 0;
+                    break;
+                case "H3":
+                    newLevel = 1;
+                        break;
+                case "H4":
+                    newLevel = 2;
+                        break;
+                case "H5":
+                    newLevel = 3;
+                        break;
+                case "H6":
+                    newLevel = 4;
+                        break;
+                
+                default:
+                    break;
+            }
+            for (let index = newLevel+1; index < levels.length; index++) {
+                levels[index] = 0;
+            }
+            ++levels[newLevel];
+            let content = "";
+            for (let index = 0; index < levels.length && index < newLevel+1; index++) {
+                content += levels[index] + ".";
+            }
+            let id = heading.textContent.replace(/[^\w]/gi, "-");
+            heading.id = id; 
+            
+            let li = `<li ><a href="#${id}"><span class="toc_number toc_depth_${newLevel+1}">${content}</span> ${heading.textContent}</a></li>`;
+
+            if(newLevel == level){
+                html += li;
+            }else if(newLevel >= level){
+                html += `${ul}${li}`;
+            }else{
+                html += `</ul>${li}`;
+            }
+            level = newLevel;
+            
+        }
+        html += `</ul></nav>`;
+        //console.log(html);
+        headings[0].insertAdjacentHTML("beforebegin", html);
+    }
+
+}
+
+var style = `
+<style>
+#toc_container ul,#toc_container li {
+    margin:0;
+    padding:0;
+}
+
+#toc_container.no_bullets ul,
+#toc_container.no_bullets li,
+#toc_container.no_bullets ul li,
+.toc_widget_list.no_bullets,
+.toc_widget_list.no_bullets li {
+    background:none;
+    list-style-type:none;
+    list-style:none;
+}
+
+#toc_container.have_bullets li {
+    padding-left:12px;
+}
+
+#toc_container ul ul {
+    margin-left:1.5em;
+}
+
+#toc_container {
+    background:#f9f9f9;
+    border:1px solid #aaa;
+    padding:10px;
+    margin-bottom:1em;
+    width:auto;
+    display:table;
+    font-size:95%;
+}
+
+#toc_container.toc_light_blue {
+    background:#edf6ff;
+}
+
+#toc_container.toc_white {
+    background:#fff;
+}
+
+#toc_container.toc_black {
+    background:#000;
+}
+
+#toc_container.toc_transparent {
+    background:none transparent;
+}
+
+#toc_container p.toc_title {
+    text-align:center;
+    font-weight:700;
+    margin:0;
+    padding:0;
+}
+
+#toc_container.toc_black p.toc_title {
+    color:#aaa;
+}
+
+#toc_container span.toc_toggle {
+    font-weight:400;
+    font-size:90%;
+}
+
+#toc_container p.toc_title + ul.toc_list {
+    margin-top:1em;
+}
+
+.toc_wrap_left {
+    float:left;
+    margin-right:10px;
+}
+
+.toc_wrap_right {
+    float:right;
+    margin-left:10px;
+}
+
+#toc_container a {
+    text-decoration:none;
+    text-shadow:none;
+    color: black; 
+}
+
+#toc_container a:hover {
+    text-decoration:underline;
+}
+
+.toc_sitemap_posts_letter {
+    font-size:1.5em;
+    font-style:italic;
+}
+</style>`;
+</script>

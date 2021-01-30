@@ -1,0 +1,199 @@
+<label for="keyword">Tags</label>
+<section class="d-flex flex-wrap" id="keywords">
+    <article class="col-md-4 form-row">
+        <section class="form-group col-9 p-0">
+            <input required="" type="text" class="form-control keywords" name="keyword" value="comprar">
+        </section>
+        <div class="form-group col-3 p-0">
+            <button type="button" class="btn btn-danger" id="removeBottom" style="display: none;" onclick="removeKeyword(this)">&#8855;</button>
+        </div>
+    </article>
+    <div class="form-group row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-success" onclick="addKeyword()" id="addKeywordButtom">Add keyword</button>
+        </div>
+    </div>
+    <div class="invalid-feedback">El número máximo de keywords no puede ser mayor de 15.</div>
+</section>
+
+<script>
+    let keyWordsArray = ["Oferta", "Chollo", "Ganga", "rebajado", "mejor precio"];
+
+    for (const keyword  of keyWordsArray) {
+        addKeyword(keyword); 
+    }
+
+    function addKeyword(text, className) {
+        let keyWords = document.getElementById("keywords");
+        //console.log(keyWords.getElementsByTagName("input"));
+        let addKeywordButtom = document.getElementById("addKeywordButtom");
+        if(keyWords.getElementsByTagName("input").length < 15){
+            if(className != "keyWordAutoAdded" || (className == "keyWordAutoAdded" && text) ) {
+                let keyword = keyWords.children[0].cloneNode(true);
+                keyword.getElementsByTagName("input")[0].id = `keyword${keyWords.children.length}`;
+                keyword.getElementsByTagName("input")[0].name = `keyword${keyWords.children.length}`;
+                if(text){
+                    keyword.getElementsByTagName("input")[0].value = text.substring(0, 200);
+                }else{
+                    keyword.getElementsByTagName("input")[0].value = ``;
+                    keyword.getElementsByTagName("input")[0].focus();
+                }
+                if(className){
+                    keyword.classList.add(className);
+                }
+                keyword.getElementsByTagName("input")[0].placeholder = `Nueva palabra clave`;
+                keyword.getElementsByTagName("button")[0].removeAttribute("style");
+                addKeywordButtom.parentNode.parentNode.insertAdjacentElement('beforebegin',keyword);
+            }
+        }
+        if(keyWords.getElementsByTagName("input").length >= 15){
+            addKeywordButtom.style.display = "none"; 
+        }
+        
+        
+        //document.getElementById("removeBottom").removeAttribute("style");
+    }
+    function removeKeyword(self) {
+        let keyWords = document.getElementById("keywords");
+        keyWords.removeChild(self.parentNode.parentNode);
+        if(keyWords.children.length == 1){
+            self.style = "display:none";
+        }
+        document.getElementById("addKeywordButtom").removeAttribute("style");
+    }
+
+    function wordCount(text) {
+		return text.match(/[^\s\.\,\:]+/gmi).length;	
+	}
+
+	function analyzeText(node) {
+
+		let text = node.textContent;
+		let words = wordCount(text);
+		if(words > 50){
+			let keywords = extractKeyWords(node.textContent);
+			let keyWordsElement = document.getElementsByClassName("keyWordAutoAdded");
+			while (keyWordsElement.length > 0) {
+				keyWordsElement[0].parentNode.removeChild(keyWordsElement[0]);
+			}
+			for(let i = 0; i < words/25; i++){
+				addKeyword(keywords[i], "keyWordAutoAdded");
+			}
+		}
+	}
+
+    function makeString(object) {
+    if (object == null) return '';
+    return '' + object;
+    };
+    function stripTags(str) {
+    return makeString(str).replace(/<\/?[^>]+>/g, '');
+    };
+    function extractKeyWords(str, options){
+        /*if(_.isEmpty(str)){
+            return [];
+        }
+        if(_.isEmpty(options)){
+            options = {
+                remove_digits: true,
+                return_changed_case: true
+            };
+        }*/
+        let return_changed_case = true;
+        let return_chained_words = true;
+        let remove_digits = true;
+        let _remove_duplicates = true;
+        let return_max_ngrams = true;
+
+        //  strip any HTML and trim whitespace
+        let text = str.trim(stripTags(str));
+
+            let words = text.split(/\s/);
+            let unchanged_words = [];
+            let low_words = [];
+            //  change the case of all the words
+            for(let x = 0;x < words.length; x++){
+                let w = words[x].match(/https?:\/\/.*[\r\n]*/g) ? words[x] : words[x].replace(/\.|,|;|!|\?|\(|\)|:|"|^'|'$|“|”|‘|’/g,'');
+                //  remove periods, question marks, exclamation points, commas, and semi-colons
+                //  if this is a short result, make sure it's not a single character or something 'odd'
+                if(w.length === 1){
+                    w = w.replace(/-|_|@|&|#/g,'');
+                }
+                //  if it's a number, remove it
+                let digits_match = w.match(/\d/g);
+                if(remove_digits && digits_match && digits_match.length === w.length){
+                    w = "";
+                }
+                if(w.length > 0){
+                    low_words.push(w.toLowerCase());
+                    unchanged_words.push(w);
+                }
+            }
+            let results = [];
+            
+            let _last_result_word_index = 0;
+            let _start_result_word_index = 0;
+            let _unbroken_word_chain = false;
+            for(let y = 0; y < low_words.length; y++){
+
+                if(stopwords.indexOf(low_words[y]) < 0){
+                    
+                    if(_last_result_word_index !== y - 1){
+                        _start_result_word_index = y;
+                        _unbroken_word_chain = false; 
+                    } else {
+                        _unbroken_word_chain = true;
+                    }
+                    let result_word = return_changed_case && !unchanged_words[y].match(/https?:\/\/.*[\r\n]*/g) ? low_words[y] : unchanged_words[y];
+                    
+                    if (return_max_ngrams && _unbroken_word_chain && !return_chained_words && return_max_ngrams > (y - _start_result_word_index) && _last_result_word_index === y - 1){
+                        let change_pos = results.length - 1 < 0 ? 0 : results.length - 1;
+                        results[change_pos] = results[change_pos] ? results[change_pos] + ' ' + result_word : result_word;
+                    } else if (return_chained_words && _last_result_word_index === y - 1) {
+                        let change_pos = results.length - 1 < 0 ? 0 : results.length - 1;
+                    results[change_pos] = results[change_pos] ? results[change_pos] + ' ' + result_word : result_word;
+                    } else {
+                    results.push(result_word);
+                    }
+
+                    _last_result_word_index = y;
+                } else {
+                    _unbroken_word_chain = false;
+                }
+            }
+
+            if(_remove_duplicates) {
+                    var frequency = {}, value;
+
+                    // compute frequencies of each value
+                    for(var i = 0; i < results.length; i++) {
+                        value = results[i];
+                        if(value in frequency) {
+                            frequency[value]++;
+                        }
+                        else {
+                            frequency[value] = 1;
+                        }
+                    }
+
+                    // make array from the frequency object to de-duplicate
+                    var uniques = [];
+                    for(value in frequency) {
+                        uniques.push(value);
+                    }
+
+                    // sort the uniques array in descending order by frequency
+                    function compareFrequency(a, b) {
+                        return frequency[b] - frequency[a];
+                    }
+
+                    results = uniques.sort(compareFrequency);
+            }
+
+            return results;
+        
+    }
+
+    {% include "tools/editor/stopwords.js" %}
+
+</script>

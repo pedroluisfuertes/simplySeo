@@ -1,0 +1,109 @@
+<section id="comonData">
+    <section class="form-group">
+        <label for="title">Title</label>
+        <input required="" type="text" class="form-control" id="title"  name="title"  onkeyup="generateLink(this)">
+        <div class="invalid-feedback">Example invalid feedback text</div>
+    </section>
+    <section class="form-group">
+        <label for="metaTitle">Meta title (<span style="font-size: 8pt;">pixels:<span id="title-length">0</span>, characters:<span id="title-string-length">0</span></span>)</label>
+        <input required="" type="text" class="form-control" id="metaTitle"  name="metaTitle" maxlength="65" >
+        <div class="invalid-feedback" id="metaTitle-error">El metatítulo debe tener como mínimo 30 caracteres y como máximo 65</div>
+    </section>
+    <div class="progress mb-2">
+        <div class="progress-bar" role="progressbar" id="progressMetaTitle" aria-valuenow="0" aria-valuemin="0" aria-valuemax="65"></div>
+    </div>
+    <section class="form-group">
+        <label for="url">Url</label>
+        <input required="" type="url" class="form-control" id="url"  name="url">
+        <div class="invalid-feedback" id="metaTitle-error">El link debe empezar por http o https.</div>
+    </section>
+    <section class="form-group mb-1">
+        <label for="metaDescription">Meta description (<span style="font-size: 8pt;">pixels:<span id="desc-length">0</span>, characters:<span id="desc-string-length">0</span></span>)</label>
+        <textarea required="" class="form-control" id="metaDescription" rows="2" maxlength="210"></textarea>
+        <div class="invalid-feedback" id="metaTitle-error">La metadescripción debe tener como mínimo 100 caracteres y como máximo 210</div>
+    </section>
+    <div class="progress mb-2">
+        <div class="progress-bar" role="progressbar" id="progressMetaDescription" aria-valuenow="0" aria-valuemin="0" aria-valuemax="210"></div>
+    </div>
+</section>
+<script>
+    function generateLink(title) {
+        let regex = /[^\w]/gm;
+        let link = title.value.toLowerCase();
+        link = link.trim();
+        link = link.replace(/à/gm, 'a'); 
+        link = link.replace(/á/gm, 'a'); 
+        link = link.replace(/â/gm, 'a'); 
+        link = link.replace(/ã/gm, 'a'); 
+        link = link.replace(/ä/gm, 'a'); 
+        link = link.replace(/å/gm, 'a'); 
+        link = link.replace(/æ/gm, 'a'); 
+        link = link.replace(/ç/gm, 'c'); 
+        link = link.replace(/è/gm, 'e'); 
+        link = link.replace(/é/gm, 'e'); 
+        link = link.replace(/ê/gm, 'e'); 
+        link = link.replace(/ë/gm, 'e'); 
+        link = link.replace(/ì/gm, 'i'); 
+        link = link.replace(/í/gm, 'i'); 
+        link = link.replace(/î/gm, 'i'); 
+        link = link.replace(/ï/gm, 'i'); 
+        link = link.replace(/ð/gm, 'o'); 
+        link = link.replace(/ñ/gm, 'n'); 
+        link = link.replace(/ń/gm, 'n'); 
+        link = link.replace(/ò/gm, 'o'); 
+        link = link.replace(/ó/gm, 'o'); 
+        link = link.replace(/ô/gm, 'o'); 
+        link = link.replace(/õ/gm, 'o'); 
+        link = link.replace(/ö/gm, 'o'); 
+        link = link.replace(/ø/gm, 'o'); 
+        link = link.replace(/ù/gm, 'u'); 
+        link = link.replace(/ú/gm, 'u'); 
+        link = link.replace(/û/gm, 'u'); 
+        link = link.replace(/ü/gm, 'u');
+        link = link.replace(regex, "-").replace(/\-+/gm, "-"); 
+        /*while (regex.test(title)) {
+            link = link.replace(regex, "-");
+        }*/
+
+        //let domain = `${window.location.href.split("/")[2]}/${encodeURI(link)}`;
+        let domain = `${_myDomain}/${encodeURI(link)}`;
+        if (typeof generateUrlSnippet === "function") { 
+            generateUrlSnippet(domain);
+        }
+        let linkElement = document.getElementById("url");
+        if (linkElement) {
+        linkElement.value = `https://${domain}`;
+        }
+        if(title.value.length <= document.getElementById("metaTitle").getAttribute("maxlength")){
+            document.getElementById("metaTitle").value = title.value;
+        }else{
+            document.getElementById("metaTitle").value = title.value.substring(0, document.getElementById("metaTitle").getAttribute("maxlength"));
+        }
+        progresionBarTitle();
+
+    }
+
+    function progresionBarTitle() {
+        let charactesrs = document.getElementById("metaTitle").value.length; 
+        document.getElementById("progressMetaTitle").setAttribute("aria-valuenow", charactesrs);
+        document.getElementById("progressMetaTitle").style.width = `${charactesrs/document.getElementById("metaTitle").getAttribute("maxlength")*100}%`;
+        document.getElementById("progressMetaTitle").innerHTML = `${charactesrs}/${document.getElementById("metaTitle").getAttribute("maxlength")}`;
+        if (typeof generateTitleData === "function") { 
+            generateTitleData(document.getElementById("metaTitle").value);
+        }
+    }
+
+    document.getElementById("metaTitle").addEventListener('keyup', (e)=>{
+        progresionBarTitle();
+    });
+    document.getElementById("metaDescription").addEventListener('keyup', ()=>{
+        let charactesrs = document.getElementById("metaDescription").value.length; 
+        document.getElementById("progressMetaDescription").setAttribute("aria-valuenow", charactesrs);
+        document.getElementById("progressMetaDescription").style.width = `${charactesrs/document.getElementById("metaDescription").getAttribute("maxlength")*100}%`;
+        document.getElementById("progressMetaDescription").innerHTML = `${charactesrs}/${document.getElementById("metaDescription").getAttribute("maxlength")}`;
+        if (typeof generateDescData === "function") { 
+            generateDescData(document.getElementById("metaDescription").value);
+        }
+    });
+</script>
+{% include "tools/meta/googlePreview.html" %}

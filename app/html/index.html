@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block main %}
+<h1>Administración de sitios</h1>
+    <form>
+        <select class="form-select" aria-label="Default select example">
+            <option selected>Nuevo Sitio</option>
+            {% for siteAux in sites %}
+				<option value="{{siteAux['id']}}" {% if siteAux['id'] == site['id'] %}selected {% endif %}>{{siteAux["url"]}}</option>
+			{% endfor %}
+          </select>
+    </form>
+        <form method="POST">
+            <div class="form-group">
+              <label for="name">Nombre del sitio</label>
+              <input type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="domain">Dominio</label>
+                <input type="text" class="form-control" id="domain" name="domain">
+            </div>
+            <div class="form-group">
+                <label for="gitRepo">Repositorio de Git</label>
+                <input type="text" class="form-control" id="gitRepo" name="gitRepo">
+            </div>
+            <div class="form-group">
+                <label for="GoogleAnalitycs">Google Analitycs</label>
+                <input type="text" class="form-control" id="GoogleAnalitycs" name="GoogleAnalitycs">
+            </div>
+            <button type="submit" class="btn btn-primary" name="action" value="newSite">Submit</button>
+          </form>
+{% endblock %}

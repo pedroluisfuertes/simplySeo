@@ -1,0 +1,72 @@
+<div class="modal" id="changeAttributesImageModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title">Debes añadir un alt a todas las imágenes</h5>
+		  <button type="button" class="close" data-dismiss="changeAttributesImageModal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+		  <!--<p>Es importante añadir un alt a todas las imágenes para tener mejores resultados en los buscadores.</p>-->
+		  <div class="form-group">
+			<label for="altImg">Introduce el alt que quierres que tenga la foto.</label>
+			<input type="text" class="form-control" id="altImg" placeholder="Ej: Intruduce un texto alternativo en caso de que la foto no se pueda ver">
+          </div>
+          <div class="form-group">
+			<label for="titleImg">Introduce el título que quierres que tenga la foto.</label>
+			<input type="text" class="form-control" id="titleImg" placeholder="Ej: Intruduce el título de la imagen.">
+          </div>
+          <div class="form-group">
+			<label for="captionImg">Introduce el caption que quierres que tenga la foto.</label>
+			<input type="text" class="form-control" id="captionImg" placeholder="Ej: Intruduce el caption de la imagen. ">
+		  </div>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-primary" data-dismiss="changeAttributesImageModal" onclick="changeAttributesToImage()">Guardar</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+
+<script>
+var imageToChange;
+  function changeAttributesToImage() {
+    imageToChange.setAttribute("alt", document.getElementById("altImg").value);
+    imageToChange.setAttribute("title", document.getElementById("titleImg").value);
+    /*let figcaption = imageToChange.closest("figure").getElementsByTagName("figcaption");
+    if(figcaption){
+        imageToChange.closest("figure").getElementsByTagName("figcaption")[0].innerHTML = document.getElementById("captionImg").value;
+    }else{
+        imageToChange.closest("figure").insertAdjacentHTML("beforeend", `<figcaption>${document.getElementById("captionImg").value}</figcaption>`)
+    }*/
+    normalizeImages();
+  }
+
+  function normalizeImages() {
+      console.log("function normalizeImages");
+    let images = descriptionEditor.getElementsByTagName("img");
+    let resultCorrect = true;
+    for (const image of images) {
+      resultCorrect =   resultCorrect && 
+                        image.hasAttribute("alt")   && image.getAttribute("alt").length > 0 &&
+                        image.hasAttribute("title") && image.getAttribute("title").length > 0; 
+                        /*image.closest("figure").getElementsByTagName("figcaption") &&
+                        image.closest("figure").getElementsByTagName("figcaption")[0].innerHTML != ""
+                        //&& image.closest("figure").getElementsByTagName("figcaption")[0].innerHTML != "Escribe una leyenda.";*/
+
+      if (!resultCorrect) {
+        image.scrollIntoView(true);
+        image.click();
+        document.getElementById("altImg").value = image.hasAttribute("alt") ? image.getAttribute("alt") : "";
+        document.getElementById("titleImg").value = image.hasAttribute("titleImg") ? image.getAttribute("titleImg") : "";
+        //document.getElementById("captionImg").value = image.closest("figure").getElementsByTagName("figcaption")[0].innerHTML;
+        imageToChange = image;
+        $('#changeAttributesImageModal').modal('show');
+        break;
+      }
+    }if(resultCorrect)
+        $('#changeAttributesImageModal').modal('hide');
+    return resultCorrect;
+  }
+</script>

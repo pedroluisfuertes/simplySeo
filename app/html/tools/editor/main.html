@@ -1,0 +1,251 @@
+<div class="form-group">
+    <label for="editor">Description</label>
+    <div required="" class="form-control" id="editor" rows="3"></div>
+</div>
+{% if keywords %}
+	{% include "tools/editor/keywords.html" %}
+{% endif %}
+{% include "tools/editor/normalizeImages.html" %}
+{% include "tools/editor/tableOfContent.html" %}
+{% include "tools/editor/afiliatesLinks.html" %}
+
+
+
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
+<script>
+    
+var newImg;
+var descriptionEditor;
+
+/* EDITOR */
+	let editorSelector = "#editor";
+			tinymce.init({
+				selector: editorSelector,  // change this value according to your HTML
+				setup: function(editor){
+
+					editor.on('NodeChange', function (e) {
+                        elementControl(e.element);
+					});
+					editor.on('init', function (e) {
+
+                        descriptionEditor = this.contentDocument;
+						descriptionEditor.head.insertAdjacentHTML("beforeend", style);
+						descriptionEditor = descriptionEditor.body; 
+                    });
+                    editor.on('init', () => {
+                        editor.getContainer().style.transition="border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out"
+                      });
+                      editor.on('focus', () => {
+                        editor.getContainer().style.boxShadow="0 0 0 .2rem rgba(0, 123, 255, .25)",
+                        editor.getContainer().style.borderColor="#80bdff"
+                      });
+                      editor.on('blur', () => {
+                        editor.getContainer().style.boxShadow="",
+                        editor.getContainer().style.borderColor=""
+                      });
+				},
+				plugins: 'print preview paste importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help charmap quickbars emoticons',
+				imagetools_cors_hosts: ['picsum.photos'],
+				menubar: 'file edit view insert format tools table help',
+				//toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media template link anchor codesample | ltr rtl',
+				toolbar: ' undo redo | bold italic underline strikethrough removeformat | emoticons template pagebreak | formatselect | alignleft aligncenter alignright | outdent indent |  numlist bullist | image media  link | fullscreen  preview | forecolor backcolor ',
+				toolbar_sticky: true,
+				autosave_ask_before_unload: false,
+				autosave_interval: "30s",
+				autosave_prefix: "{path}{query}-{id}-",
+				autosave_restore_when_empty: false,
+				autosave_retention: "2m",
+				image_advtab: true,
+				content_css: [
+					'//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
+					'//www.tiny.cloud/css/codepen.min.css'
+				],
+				link_list: [
+					{ title: 'My page 1', value: 'http://www.tinymce.com' },
+					{ title: 'My page 2', value: 'http://www.moxiecode.com' }
+				],
+				image_list: [
+					{ title: 'My page 1', value: 'http://www.tinymce.com' },
+					{ title: 'My page 2', value: 'http://www.moxiecode.com' }
+				],
+				image_class_list: [
+					{ title: 'None', value: '' },
+					{ title: 'Some class', value: 'class-name' }
+				],
+				importcss_append: true,
+				height: 400,
+				file_picker_callback: function (callback, value, meta) {
+					/* Provide file and text for the link dialog */
+					if (meta.filetype === 'file') {
+					callback('https://www.google.com/logos/google.jpg', { text: 'My text' });
+					}
+
+					/* Provide image and alt text for the image dialog */
+					if (meta.filetype === 'image') {
+					callback('https://www.google.com/logos/google.jpg', { alt: 'My alt text' });
+					}
+
+					/* Provide alternative source and posted for the media dialog */
+					if (meta.filetype === 'media') {
+					callback('movie.mp4', { source2: 'alt.ogg', poster: 'https://www.google.com/logos/google.jpg' });
+					}
+				},
+				templates: [
+					{ title: 'Amazon', description: 'Producto simple', content: '[amazon box=""]' },
+					{ title: 'Amazon horizontal', description: 'Una prueba', content: '[amazon box="" template="horizontal"]' },
+					{ title: 'Amazon vertical', description: 'Una prueba', content: '[amazon box="" template="vertical"]' },
+					{ title: 'Amazon lista', description: 'Una prueba', content: '[amazon box="" template="list"]' },
+					{ title: 'Amazon grid', description: 'Una prueba', content: '[amazon box="" grid="3"]' },
+				],
+				template_cdate_format: '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+				template_mdate_format: '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+				height: 600,
+				image_caption: true,
+				quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+				noneditable_noneditable_class: "mceNonEditable",
+				toolbar_drawer: 'sliding',
+                contextmenu: "link image imagetools table",
+                skin: 'bootstrap',
+                mode : "textareas",
+                //language : "es",
+                });
+                
+    // Remove de alert from tiny editor
+    new MutationObserver((mutationsList, observer)=>{
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                for (const node of mutation.addedNodes) {
+                    if(node.className  == "tox-notifications-container"){
+                        observer.disconnect();
+                        let a = document.querySelector(".tox-button--icon");
+						if(a)
+							a.click();
+                    }
+                }
+            }
+        }
+    }).observe(document, { attributes: false, childList: true, subtree: true });
+
+
+		/*descriptionEditor.addEventListener('keyup', ()=>{
+             analyzeText(descriptionEditor);
+		});*/
+
+    function elementControl(node) {
+
+        switch (node.tagName) {
+            case "IMG":
+                changeImageAttributes(node);
+                break;
+            case "H1":
+                var p = document.createElement('p');
+                p.innerHTML = node.innerHTML;
+                node.parentNode.replaceChild(p, node);
+                break;
+            case "H2":
+            case "H3":
+            case "H4":
+            case "H5":
+            case "H6":
+                generateMenuNavigation();
+                break;
+            case "A":
+                propeLinks(node);
+                break;
+            default:
+                break;
+        }
+    }
+	
+
+	function changeImageAttributes(node) {
+		if(newImg != null && node.tagName === "IMG" && node.src.indexOf(newImg.ramdomId)>-1){    
+						/*node.setAttribute("src", newImg["image"].srcToOriginalImage);
+                        node.setAttribute("srcset", newImg.srcset);*/
+                        console.log(newImg["picture"]);
+                        
+                        node.insertAdjacentHTML("beforebegin", newImg["picture"]);
+                        node.parentNode.removeChild(node);
+						newImg = null;
+                    }
+	}
+	
+	var nodeSelected;
+
+	/*function testDomain(domain){
+		let domainRegex = /(?<domain>[a-zA-z](?:[a-zA-Z0-9]|(?:(?:[\.\-_])\w)){1,252}\.(?<tdl>[a-zA-Z]{2,6})\.?)/gmi;
+		return domainRegex.test(domain);
+	}*/
+	function propeLinks(node) {
+
+        if(node.tagName === "A"){
+            if(node.parentNode.textContent[0] != "{"){
+                if(afiliatesSites.has(node.host)){
+                    node.setAttribute("rel","sponsored"); 
+                    node.setAttribute("target","_blank");
+                    node.setAttribute("title",afiliatesSites.get(node.host).title);
+                    nodeSelected = node;
+                    node.setAttribute("href",afiliatesSites.get(node.host).href(afiliatesSites.get(node.host), node.href, true));
+                    /*console.log(node.text);
+                       if(!node.text || testDomain(node.text))
+                        node.text = afiliatesSites.get(node.host).title;*/
+                }else if(node.host == "res.cloudinary.com"){
+					node.insertAdjacentHTML("afterend", generatePicture(node.getAttribute("href")));
+					node.parentNode.removeChild(node);
+				}
+            }else{
+                var aux = document.createElement('div');
+                aux.appendChild(node.cloneNode(true));
+                node.parentNode.innerHTML = node.parentNode.innerHTML.replace(aux.innerHTML, node.textContent);
+            }
+        }
+         
+		
+	}
+	/*
+	// Callback function to execute when mutations are observed
+	const observerCallback = function(mutationsList, observer) {
+        observer.disconnect();
+        
+		// Use traditional 'for loops' for IE 11
+		for(let mutation of mutationsList) {
+			if (mutation.type === 'childList') {
+				for(let node of mutation.addedNodes){
+					if(node.tagName === "IMG" || node.tagName === "A")
+                        elementControl(node);
+				}
+			}
+			else if (mutation.type === 'attributes') {
+				if(mutation.attributeName === "src"){
+					console.log('The ' + mutation.attributeName + ' attribute was modified.');
+					changeImageAttributes(mutation.target);
+				}else if(mutation.attributeName === "href"){
+                    // To break the recursivity
+					if(mutation.target !== nodeSelected){
+						propeLinks(mutation.target);
+					}else{
+						nodeSelected = null;
+					}
+					
+				}
+				
+			}
+		}
+		observer.observe(descriptionEditor, config);
+	};
+
+	// Create an observer instance linked to the callback function
+	const observer = new MutationObserver(observerCallback);
+    // Options for the observer (which mutations to observe)
+    const config = { attributes: true, childList: true, subtree: true };
+	observer.observe(descriptionEditor, config);
+    
+	// Start observing the target node for configured mutations
+	//observer.observe(targetNode, config);
+
+	// Later, you can stop observing
+    //observer.disconnect()
+    */
+
+</script>

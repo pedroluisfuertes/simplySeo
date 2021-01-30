@@ -1,0 +1,162 @@
+<!-- Include stylesheet -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<!-- Create the editor container -->
+<div class="form-group">
+  <label for="editor">Description</label>
+  <div>
+    <div id="editor">
+
+    </div>
+  </div>
+</div>
+
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- Initialize Quill editor -->
+<script>
+  var quill = new Quill('#editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+      [{ 'header': [2, 3, 4, 5, 6, false] }],
+
+      [{ 'header': 2 }],               // custom button values
+      [{ 'align': [] }, { 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+
+      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+
+      [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+      //[{ 'font': [] }],
+
+      ['clean']                                         // remove formatting button
+      ]
+    },
+  });
+
+
+  var descriptionEditor = document.querySelector(".ql-editor");
+  function elementControl(node) {
+    console.log(node);
+    switch (node.tagName) {
+        case "IMG":
+            changeImageAttributes(node);
+            break;
+        case "H1":
+            var p = document.createElement('p');
+            p.innerHTML = node.innerHTML;
+            node.parentNode.replaceChild(p, node);
+            break;
+        case "H2":
+        case "H3":
+        case "H4":
+        case "H5":
+        case "H6":
+            console.log("asdfas");
+            generateMenuNavigation();
+            break;
+        case "A":
+            propeLinks(node);
+            break;
+        default:
+            break;
+    }
+    }
+
+
+    function changeImageAttributes(node) {
+    if(newImg != null && node.tagName === "IMG" && node.src.indexOf(newImg.ramdomId)>-1){    
+        /*node.setAttribute("src", newImg["image"].srcToOriginalImage);
+                    node.setAttribute("srcset", newImg.srcset);*/
+                    console.log(newImg["picture"]);
+                    
+                    node.insertAdjacentHTML("beforebegin", newImg["picture"]);
+                    node.parentNode.removeChild(node);
+        newImg = null;
+                }
+    }
+
+    var nodeSelected;
+
+    /*function testDomain(domain){
+    let domainRegex = /(?<domain>[a-zA-z](?:[a-zA-Z0-9]|(?:(?:[\.\-_])\w)){1,252}\.(?<tdl>[a-zA-Z]{2,6})\.?)/gmi;
+    return domainRegex.test(domain);
+    }*/
+    function propeLinks(node) {
+
+    if(node.tagName === "A"){
+        if(node.parentNode.textContent[0] != "{"){
+            if(afiliatesSites.has(node.host)){
+                node.setAttribute("rel","sponsored"); 
+                node.setAttribute("target","_blank");
+                node.setAttribute("title",afiliatesSites.get(node.host).title);
+                nodeSelected = node;
+                node.setAttribute("href",afiliatesSites.get(node.host).href(afiliatesSites.get(node.host), node.href, true));
+                /*console.log(node.text);
+                  if(!node.text || testDomain(node.text))
+                    node.text = afiliatesSites.get(node.host).title;*/
+            }else if(node.host == "res.cloudinary.com"){
+      node.insertAdjacentHTML("afterend", generatePicture(node.getAttribute("href")));
+      node.parentNode.removeChild(node);
+    }
+        }else{
+            var aux = document.createElement('div');
+            aux.appendChild(node.cloneNode(true));
+            node.parentNode.innerHTML = node.parentNode.innerHTML.replace(aux.innerHTML, node.textContent);
+        }
+    }
+    
+
+    }
+
+    // Callback function to execute when mutations are observed
+    const observerCallback = function(mutationsList, observer) {
+    observer.disconnect();
+        //console.log(mutationsList);
+    // Use traditional 'for loops' for IE 11
+    for(let mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+            for(let node of mutation.addedNodes){
+                //if(node.tagName === "IMG" || node.tagName === "A")
+                    elementControl(node);
+            }
+        }else if (mutation.type === 'attributes') {
+            if(mutation.attributeName === "src"){
+                console.log('The ' + mutation.attributeName + ' attribute was modified.');
+                changeImageAttributes(mutation.target);
+            }else if(mutation.attributeName === "href"){
+                // To break the recursivity
+                if(mutation.target !== nodeSelected){
+                    propeLinks(mutation.target);
+                }else{
+                    nodeSelected = null;
+                }
+            
+            }
+
+        }
+    }
+    observer.observe(descriptionEditor, config);
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(observerCallback);
+    const config = { attributes: true, childList: true, subtree: true };
+
+    observer.observe(descriptionEditor, config);
+    // Options for the observer (which mutations to observe)
+
+
+    {% include "tools/editor/tableOfContent.js" %}
+
+
+</script>
+
+<style>
+  .ql-editor{
+    min-height: 15rem;
+  }
+</style>

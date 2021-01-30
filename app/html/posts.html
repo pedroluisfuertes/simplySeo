@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block main %}
+<h1>Administración de posts</h1>
+{% if site %}
+
+<div class="" id="inputs">
+    {% include "tools/meta/main.html" %}
+    <section class="form-group mt-3">
+      <label>Galería de imágenes</label>
+      <div>
+        {% include "tools/imagesGallery.html" %}
+      </div>
+    </section>
+    <!--<section class="card card-body mb-3">
+      <label>Imagen de portada</label>
+        <div class="row mb-3">
+          <div class="col d-inline">
+            <input type="url" class="form-control" placeholder="Url de la imagen" id="mainImagePath" >
+          </div>
+          <div class="col d-inline">
+            <input type="text" class="form-control" placeholder="Texto alternativo" id="mainImageAlt">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col d-inline">
+            <input type="text" class="form-control" placeholder="Título" id="mainImageTitle">
+          </div>
+          <div class="col d-inline">
+            <input type="text" class="form-control" placeholder="Caption" id="mainImageCaption">
+          </div>
+        </div>
+    </section>
+    <section class="form-group">
+        <label for="smallDescription">Breve descripción</label>
+        <textarea required=""  class="form-control" id="smallDescription" rows="2" maxlength="200"></textarea>
+        <div class="invalid-feedback" id="smallDescription-error">Esta descripción debe tener como mínimo 50 caracteres y como máximo 200</div>
+    </section>
+    <div class="progress mb-2">
+      <div class="progress-bar" role="progressbar" id="progressSmallDescription" aria-valuenow="0" aria-valuemin="0" aria-valuemax="200"></div>
+  </div>
+  <script>
+      document.getElementById("smallDescription").addEventListener('keyup', (e)=>{
+          let charactesrs = document.getElementById("smallDescription").value.length; 
+          document.getElementById("progressSmallDescription").setAttribute("aria-valuenow", charactesrs);
+          document.getElementById("progressSmallDescription").style.width = `${charactesrs/document.getElementById("smallDescription").getAttribute("maxlength")*100}%`;
+          document.getElementById("progressSmallDescription").innerHTML = `${charactesrs}/${document.getElementById("smallDescription").getAttribute("maxlength")}`;
+      });
+  </script>-->
+    {% set keywords = false %}
+    {% include "tools/editor/main.html"  %}
+    {% include "tools/notifications.html" %}
+
+    <button type="button" class="btn btn-primary" id="addPost" onclick="getAndValidatePost()">Add post</button>
+</div>
+
+<script>
+    function showElementError(elementId) {
+        document.getElementById(elementId).focus();
+        try {
+        document.getElementById(elementId).closest(".form-group").querySelector('.invalid-feedback').style.display = "block";
+        } catch (error) {
+        
+        }
+    }
+    function stringIsCorrect(input) {
+        return (input && input !== null && input !== "" && input.length > 0) ? true : false;
+    }
+
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+        } catch (_) {
+            return false;  
+        }
+        return true;
+    }
+    function getElementIfItIsCorrect(elementId, options) {
+        let elementValue = document.getElementById(elementId).value;
+        if( (options &&
+            ((options.hasOwnProperty("minLength") && elementValue.length < options.minLength) ||
+            (options.hasOwnProperty("maxLength") && elementValue.length > options.maxLength) || 
+            (options.hasOwnProperty("isUrl") && options.isUrl === true && !isValidUrl(elementValue)))) ||
+            !stringIsCorrect(elementValue)){
+                error = true;
+                let errorDescription = options && options.hasOwnProperty("errorDescription") ? options.errorDescription : "Rellena los campos correctamente";
+                let errorTitle = options && options.hasOwnProperty("errorTitle") ? options.errorTitle : "Error";
+                addNotification(errorTitle, errorDescription, "error")
+                showElementError(elementId);
+                return false;
+            }else{
+        return elementValue;
+    }
+  }
+
+
+
+	function getAndValidatePost() {
+		let post = {};
+
+		document.querySelectorAll('.invalid-feedback').forEach(error =>{
+		    error.style.display ="none";
+		})
+
+
+		post.title = getElementIfItIsCorrect("title", {"minLength":30}); if(!post.title){ return;}
+		post.metaTitle = getElementIfItIsCorrect("metaTitle", {"minLength":30, "maxLength":65}); if(!post.metaTitle){ return; }
+		post.url = getElementIfItIsCorrect("url", {"isUrl" : true, "errorDescription": "La url del post no es correcta", "errorTitle":"Error en la url del post"}); if(!post.url){return;}
+		post.metaDescription = getElementIfItIsCorrect("metaDescription", {"minLength":100, "maxLength":210, "errorDescription" :"Error en la metadescripción"}); if(!post.metaDescription){ return;}
+
+
+		post.content = descriptionEditor.innerHTML;
+
+		//imagesHaveAltAttribute();
+	
+		if(normalizeImages()){
+            console.log(post);
+            return post; 
+        }else{
+            return null; 
+        }
+
+	}
+  </script>
+{% else %}
+    <p>No se ha seleccionado ningún sitio</p>
+{% endif %}
+{% endblock %}

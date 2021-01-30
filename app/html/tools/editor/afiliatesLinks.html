@@ -1,0 +1,56 @@
+<script>
+
+var afiliatesSites = new Map();
+afiliatesSites.set("www.amazon.es", {name: "Amazon", 
+                                     title:"Comprar esta oferta en Amazon", 
+                                     href:(self, url, addAfiliateTag)=>{
+                                        //let href = url.match(/https?:\/\/www\.amazon\.es\/(?:[^\/]+\/dp\/|gp\/product\/)(?<id>[^?\/]+)/gm);
+                                        let href = url.match(/ama?zo?n\.(?<country>:com|es|ca|co\.uk)\/(?:(?:[^"\'/]*)\/)?(?:(?:exec\/obidos\/ASIN|o|gp\/product|dp)\/)?(?<asin>[A-Z0-9]{10})/gm);
+                                        if(href == null){
+                                            return url;
+                                        }else{
+                                            if(addAfiliateTag){
+                                                href += `/?tag=${self.afiliateTag}`;
+                                            }
+                                            return href;
+                                        }
+                                        },
+                                    afiliateTag: "{{amazonAffiliateTag}}"
+                                        });
+afiliatesSites.set("amzn.to", { name: "Amazon", 
+                                title:"Comprar esta oferta en Amazon", 
+                                href:(url)=>{
+                                        return url;
+                                        },
+                                afiliateTag : "{{amazonAffiliateTag}}",
+                                        });
+                                        
+/*document.addEventListener('paste', (event) => {
+
+	let target = event.target;
+	if(target.tagName == "INPUT" || target.tagName == "TEXTAREA"){
+		let paste = (event.clipboardData || window.clipboardData).getData('text');
+		//target.value = paste.toUpperCase();
+		let host = paste.match(/(?<domain>[a-zA-z](?:[a-zA-Z0-9]|(?:(?:[\.\-_])\w)){1,252}\.(?<tdl>[a-zA-Z]{2,6})\.?)/gmi);
+		console.log(host);
+		if(host.length > 0){
+			host = host[0];
+			host = afiliatesSites.get(host);
+			if(host != undefined){
+				target.value = host.href(host, paste, true);
+				event.preventDefault();
+			}
+		}
+		
+	}
+    
+	console.log(event);
+
+    /*const selection = window.getSelection();
+    if (!selection.rangeCount) return false;
+    selection.deleteFromDocument();
+    selection.getRangeAt(0).insertNode(document.createTextNode(paste));
+	*/
+    
+//});
+</script>
